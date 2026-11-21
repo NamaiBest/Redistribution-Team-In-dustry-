@@ -4,13 +4,28 @@
 
 The demo covers **tomato, banana, brinjal, cabbage, cauliflower, onion, and potato** across seven representative state hubs. It applies inventory optimization and logistics from the [IIT Madras Industry 4.0 course outline](https://study.iitm.ac.in/ds/course_pages/BSMS4001.html).
 
-## Open Produce Relay
+## Team quick start
 
-[Launch the public browser planner](https://namaibest.github.io/india-tomato-redistribution/). The map covers reporting states for arrivals and wholesale prices. The dispatch network covers seven hubs. Try a historical replay or enter stock, confirmed local orders, and remaining shelf life. You can edit route quotes and download a proposed shipment plan. Entries remain in the open browser session.
+[Open Produce Relay](https://namaibest.github.io/india-tomato-redistribution/). No installation or sign-in is needed. The site answers a dispatch question: which hub should send produce, which receiving hub can use it, and how much should move before it spoils?
 
-The browser uses Leaflet for the choropleth, Scrollama for the scroll-driven method walkthrough, and javascript-lp-solver for the same linear-programming formulation as the reference Python app. The visual pacing follows the ScrollCraft approach. The produce photo is illustrative.
+### Try it in three minutes
 
-Run the static site locally with Node.js 24 and Python 3:
+1. Under **Perishable crop**, choose **Tomato**. Keep **Historical replay** and select **Dispatch balance** under **Map shading**. Green indicates modeled surplus and orange indicates a modeled shortfall. Click a state to inspect its arrivals, wholesale price, and dispatch balance.
+2. Scroll to **Proposed shipments**. The default replay delivers **17.80 t** across four lanes. Modeled spoilage falls from **11.86 t to 3.43 t** compared with zero transfers under the same settings. Set shelf life to **12 hours** and the tomato shipments drop to zero. Restore **24 hours** before the next step.
+3. Switch **Planning data** to **Enter hub stock & orders**. Enter **10 t saleable stock in Maharashtra** and **5 t confirmed orders in Karnataka**. With the default lane settings, the planner sends about **5.25 t** to deliver **5.00 t** after transit loss. Use **Download CSV** to see the proposed shipment in a shareable format.
+4. Return to **Historical replay** and try **Banana** or **Onion**. Choose **Wholesale price** to inspect a different market signal. For banana, Madhya Pradesh becomes a receiver. Each run uses one crop.
+
+### What to explain in the viva
+
+- **Why this problem matters.** India used interstate tomato procurement in 2023 to supply markets facing rising retail prices. Our tool tests how a coordinator could evaluate transfers when stock and orders are known. [Government announcement](https://www.pib.gov.in/PressReleasePage.aspx?PRID=1938858&lang=2&reg=48)
+- **What the data actually measures.** AGMARKNET records arrivals at reporting mandis and weighted wholesale prices. The replay uses the arrival gap as a proxy for available stock or an unfilled receiving target. The national map can show observations beyond the seven hubs in the dispatch model. Survey loss is a separate historical measure.
+- **Why use a linear program.** The decision variable is tonnes to send on each lane. Cost and modeled losses scale with tonnes. Supply, buyer orders, travel time, and lane capacity constrain the plan. This makes it possible to explain each proposed transfer and compare it with zero transfers.
+- **What our results establish.** The numbers are outputs of a simulation, using assumed costs and spoilage rates. A field pilot would use time-stamped stock, buyer orders, route quotes, and measured edible weights at dispatch and receipt. Single-crop runs do not share vehicle capacity.
+- **What to prepare.** The course calls for a two-page Week 8 summary, a three-page final group report, a 15-minute viva presentation with 5 minutes of Q&A, and a team contribution record. Use the [operational-application passage](report/operational-application.md) in the managerial implications section.
+
+## Run the browser planner locally
+
+Use Node.js 24 and Python 3. The browser runs the optimization locally. Entered quantities stay in the open session.
 
 ```sh
 cd web
@@ -19,7 +34,7 @@ npm test
 npm run dev
 ```
 
-The [report passage](report/operational-application.md) connects the application to a documented 2023 procurement action and explains how a pilot could measure real effects.
+The site uses [Leaflet](https://github.com/Leaflet/Leaflet) for the map, [Scrollama](https://github.com/russellsamora/scrollama) for the scroll-driven walkthrough, and [javascript-lp-solver](https://github.com/JWally/jsLPSolver) for the linear program. The visual pacing follows the [ScrollCraft](https://github.com/singhharsh1708/scrollcraft) approach. The produce photo is illustrative.
 
 ## Run the Python demo
 
@@ -55,14 +70,6 @@ The simplified state geometries come from [geoBoundaries gbOpen India ADM1](http
 2. Allow a transfer only between a surplus and a receiver with an unfilled target. Each lane uses assumed travel time, capacity, and cost. The reverse direction uses the same assumptions. Crop shelf-life and hourly spoilage presets are adjustable scenario inputs. The model assumes delivered produce is used immediately.
 3. Choose tonnes sent using a linear program. It minimizes transport spend plus assumed penalties for spoilage and unfilled targets. Gross dispatch is capped by source stock and lane capacity. Edible receipts after transit spoilage are capped by the receiving target.
 4. Compare with zero transfers under the same assumptions. Modeled spoilage is the sum of transit loss and the assumed loss on unsent surplus. The historic survey percentages are never applied as route loss rates.
-
-## Three-minute walkthrough
-
-1. Start with **Tomato** and show **Scenario balance**. With the defaults, 17.80 t arrive on four lanes and modeled spoilage changes from 11.86 t with no transfer to 3.43 t with transfers. Change shelf life from 24 to 12 hours and the tomato shipments drop to zero.
-2. Switch to **Banana**. Under its default assumptions, Madhya Pradesh becomes a receiver and 7.96 t are delivered. Use the **Survey loss** map to show the historical survey values and where the survey has gaps. Use **State data** to explain why missing arrival history blocks a state from dispatch.
-3. Open **Compare crops**. The rows show separate decisions under the same pilot share and cost weights. The cauliflower example has substantial modeled spoilage remaining because the excess-arrivals proxy is much larger than the receiving targets and network can absorb.
-
-The comparisons demonstrate model behavior under hypothetical operating conditions. They do not estimate observed waste reductions or predict an actual dispatch. Production use would require time-stamped inventory, freshness, buyer orders, route quotes, and loading and receiving times.
 
 ## Validate locally
 
