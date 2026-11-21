@@ -1,3 +1,7 @@
 .venv/
 __pycache__/
 .DS_Store
+web/dist/
+web/node_modules/
+web/public/market.json
+web/public/boundaries.json

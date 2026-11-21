@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Explore India's produce markets and plan shelf-life-constrained transfers between regional hubs.">
+  <meta name="theme-color" content="#153b30">
+  <title>Produce Relay · Interstate produce planner</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <a class="skip" href="#planner">Skip to planner</a>
+  <header class="site-header">
+    <div class="frame bar">
+      <a class="brand" href="#"><span class="brand-mark" aria-hidden="true">↗</span> Produce Relay</a>
+      <nav aria-label="Main navigation"><a href="#planner">Planner</a><a href="#method">Method</a><a href="#sources">Sources</a></nav>
+    </div>
+  </header>
+  <main>
+    <section class="hero">
+      <div class="frame hero-grid">
+        <div class="hero-copy">
+          <div class="eyebrow">In-dustry · IIT Madras</div>
+          <h1>Move fresh food where it’s needed.</h1>
+          <p>Explore India’s produce markets and plan transfers that can reach buyers before the crop spoils.</p>
+          <a class="button primary" href="#planner">Explore the planner</a>
+          <small>Seven crops · Seven dispatch hubs</small>
+        </div>
+        <figure class="hero-photo">
+          <img src="./produce.webp" alt="An illustrative produce warehouse with crates of tomatoes, bananas, brinjal, and cabbage" fetchpriority="high" width="1320" height="880">
+          <figcaption>Illustration of a produce hub</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="frame section" id="planner" aria-labelledby="planner-heading">
+      <div class="section-head">
+        <div><p class="eyebrow">Market explorer &amp; dispatch</p><h2 id="planner-heading">From arrivals to a shipment plan</h2></div>
+        <p class="date-tag">Market snapshot · August 2025</p>
+      </div>
+      <div class="callout" id="initial-status" role="status">Loading the market data and map…</div>
+      <div id="app" hidden>
+        <form id="configuration">
+          <div class="controls">
+            <label for="crop">Perishable crop<select id="crop"></select></label>
+            <label for="mode">Planning data<select id="mode"><option value="historical">Historical replay</option><option value="custom">Enter hub stock &amp; orders</option></select></label>
+            <label for="layer">Map shading<select id="layer"><option value="arrival">Reported arrivals</option><option value="price">Wholesale price</option><option value="balance">Dispatch balance</option><option value="waste">Modeled local spoilage</option><option value="survey">Historical survey loss</option></select></label>
+            <label for="shelf">Shelf life at dispatch (hours)<input id="shelf" type="number" min="0" max="720" step="1" required></label>
+          </div>
+          <p id="mode-note" class="fine"></p>
+          <details id="custom-detail" hidden><summary>Enter stock, local orders and shelf life</summary>
+            <p class="fine">Use saleable stock and confirmed orders for the same time window. Each hub fills its local orders first. Entries stay in this browser session.</p>
+            <div class="table-wrap"><table><thead><tr><th>State hub</th><th>Saleable stock (t)</th><th>Confirmed orders (t)</th><th>Remaining life (h)</th></tr></thead><tbody id="custom-rows"></tbody></table></div>
+          </details>
+          <details id="assumptions"><summary>Adjust cost, spoilage and lane capacity</summary>
+            <div class="controls advanced">
+              <label for="share">Pilot share of arrival gap (%)<input id="share" type="number" min="0" max="100" step="0.05" value="0.10" required></label>
+              <label for="transit">Transit spoilage per hour (%)<input id="transit" type="number" min="0" max="100" step="0.01" required></label>
+              <label for="local-loss">Unsent surplus spoilage (%)<input id="local-loss" type="number" min="0" max="100" step="1" value="50" required></label>
+              <label for="loss-penalty">Spoilage cost (₹/t)<input id="loss-penalty" type="number" min="0" step="1" value="5000" required></label>
+              <label for="shortage-penalty">Unfilled-order cost (₹/t)<input id="shortage-penalty" type="number" min="0" step="1" value="8000" required></label>
+            </div>
+            <p class="fine">Lane assumptions apply in both directions. Replace them with current transport quotes for an operational scenario.</p>
+            <div class="table-wrap"><table><thead><tr><th>Lane</th><th>Travel (h)</th><th>Capacity (t)</th><th>Cost (₹/t)</th></tr></thead><tbody id="lane-rows"></tbody></table></div>
+          </details>
+          <p id="form-status" class="fine" role="status" hidden></p>
+        </form>
+
+        <div class="map-grid">
+          <div class="map-card">
+            <div class="map-bar"><div><strong id="map-title">India market map</strong><div id="map-legend" class="fine"></div></div><button class="quiet" id="reset-map" type="button">Reset view</button></div>
+            <div id="map" aria-label="Interactive map of India's reported produce arrivals, wholesale prices and model routes"></div>
+            <div class="map-footer fine"><span>● Hub</span><span>━ Proposed transfer</span><span>Gray · Missing or outside this layer</span></div>
+          </div>
+          <aside class="state-panel" aria-labelledby="state-title">
+            <label for="state-select">Inspect a state<select id="state-select"></select></label>
+            <h3 id="state-title"></h3><p id="state-signal" class="fine"></p>
+            <dl class="state-values" id="state-values"></dl>
+          </aside>
+        </div>
+
+        <div class="metric-grid" aria-live="polite">
+          <div class="metric"><span>Delivered</span><strong id="delivered"></strong><small id="delivered-note"></small></div>
+          <div class="metric"><span>Modeled spoilage</span><strong id="waste"></strong><small id="waste-note"></small></div>
+          <div class="metric"><span>Target still unfilled</span><strong id="unmet"></strong><small id="unmet-note"></small></div>
+        </div>
+        <section class="results" aria-labelledby="results-heading">
+          <div class="result-heading"><div><h3 id="results-heading">Proposed shipments</h3><p class="fine" id="route-note"></p></div><button class="button secondary" id="export" type="button">Download CSV</button></div>
+          <div class="table-wrap"><table id="shipments"><thead><tr><th>Origin</th><th>Destination</th><th>Sent</th><th>Delivered</th><th>Travel</th><th>Shelf life left</th><th>Cost</th></tr></thead><tbody id="shipment-rows"></tbody></table></div>
+          <p id="empty-routes" class="callout" hidden></p>
+        </section>
+      </div>
+    </section>
+
+    <section class="method-shell" id="method" aria-labelledby="method-heading">
+      <div class="frame section method-grid">
+        <div class="method-lead">
+          <p class="eyebrow">How the planner works</p>
+          <h2 id="method-heading">A shortage is a signal. A buyer makes it a shipment.</h2>
+          <p>India has used this kind of redistribution before. In July 2023, the government directed tomato procurement from Andhra Pradesh, Karnataka, and Maharashtra for distribution in centres with rising retail prices.</p>
+          <a href="https://www.pib.gov.in/PressReleasePage.aspx?PRID=1938858&amp;lang=2&amp;reg=48">Read the government announcement</a>
+        </div>
+        <div class="method-steps">
+          <article class="story-step"><h3>Read both market signals</h3><p>Compare reported arrivals and wholesale prices with the previous three Augusts. Low arrivals alongside higher prices flag a market worth checking. Reporting changes can also affect arrivals.</p></article>
+          <article class="story-step"><h3>Confirm the stock and the orders</h3><p>Enter saleable tonnes, buyer orders, and shelf life at the pilot hubs. The planner reserves stock for local orders and offers any excess to hubs with unmet orders.</p></article>
+          <article class="story-step"><h3>Compare feasible transfers</h3><p>The optimizer weighs freight, modeled spoilage, and unfilled orders. It respects lane capacity and remaining shelf life. The results show the plan against a no-transfer baseline.</p></article>
+        </div>
+      </div>
+    </section>
+    <section id="sources" class="frame section source-section" aria-labelledby="source-heading">
+      <h2 id="source-heading">Data and limitations</h2>
+      <dl class="sources-list">
+        <div><dt><a href="https://agmarknet.gov.in/home">AGMARKNET</a></dt><dd>State-level reported mandi arrivals and weighted wholesale prices, August 2022–2025. Prices are a market signal. Dispatch uses arrival-gap proxies or entered stock and orders.</dd></div>
+        <div><dt><a href="https://www.mofpi.gov.in/api/documents/file/phl_study_final_report_07.12.2022_2.pdf">MoFPI / NABCONS</a></dt><dd>Historical post-harvest loss estimates for selected crops and states. Survey percentages are displayed independently from modeled spoilage.</dd></div>
+        <div><dt><a href="https://www.geoboundaries.org/api/current/gbOpen/IND/ADM1/">geoBoundaries</a></dt><dd>Simplified India ADM1 geometries, sourced from DataMeet India and the Election Commission of India, under CC BY 2.5 India.</dd></div>
+      </dl>
+      <p class="fine">One crop per run. Lines link representative hubs and show proposed transfers. They do not represent driving directions or live shipments.</p>
+    </section>
+  </main>
+  <footer><div class="frame bar"><span>Produce Relay · Industry 4.0</span><a href="https://github.com/NamaiBest/india-tomato-redistribution">Source on GitHub</a></div></footer>
+  <script type="module" src="./main.js"></script>
+</body>
+</html>

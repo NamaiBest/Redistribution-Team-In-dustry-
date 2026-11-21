@@ -1,0 +1,23 @@
+{
+  "name": "produce-relay",
+  "version": "1.0.0",
+  "description": "Browser planner for shelf-life-constrained produce transfers",
+  "scripts": {
+    "test": "node --test",
+    "dev": "vite",
+    "build": "vite build --base=./",
+    "prebuild": "python3 export_data.py",
+    "predev": "python3 export_data.py",
+    "pretest": "python3 export_data.py"
+  },
+  "type": "module",
+  "dependencies": {
+    "javascript-lp-solver": "^1.0.3",
+    "leaflet": "^1.9.4",
+    "scrollama": "^3.2.0"
+  },
+  "devDependencies": {
+    "vite": "^8.3.8"
+  },
+  "private": true
+}

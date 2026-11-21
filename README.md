@@ -2,9 +2,26 @@
 
 **Research question.** Under what shelf-life, lane-capacity, and transport-cost conditions can interstate transfers of perishable produce reduce modeled spoilage and unfilled receiving targets compared with keeping stock local?
 
-The demo covers **tomato, banana, brinjal, cabbage, and cauliflower** across seven representative state hubs. It applies inventory optimization and logistics from the [IIT Madras Industry 4.0 course outline](https://study.iitm.ac.in/ds/course_pages/BSMS4001.html).
+The demo covers **tomato, banana, brinjal, cabbage, cauliflower, onion, and potato** across seven representative state hubs. It applies inventory optimization and logistics from the [IIT Madras Industry 4.0 course outline](https://study.iitm.ac.in/ds/course_pages/BSMS4001.html).
 
-## Run the demo
+## Open Produce Relay
+
+[Launch the public browser planner](https://namaibest.github.io/india-tomato-redistribution/). The map covers reporting states for arrivals and wholesale prices. The dispatch network covers seven hubs. Try a historical replay or enter stock, confirmed local orders, and remaining shelf life. You can edit route quotes and download a proposed shipment plan. Entries remain in the open browser session.
+
+The browser uses Leaflet for the choropleth, Scrollama for the scroll-driven method walkthrough, and javascript-lp-solver for the same linear-programming formulation as the reference Python app. The visual pacing follows the ScrollCraft approach. The produce photo is illustrative.
+
+Run the static site locally with Node.js 24 and Python 3:
+
+```sh
+cd web
+npm ci
+npm test
+npm run dev
+```
+
+The [report passage](report/operational-application.md) connects the application to a documented 2023 procurement action and explains how a pilot could measure real effects.
+
+## Run the Python demo
 
 From the repository root with Python 3.12:
 
@@ -21,14 +38,14 @@ Select a crop. The dispatch map supports three views: starting surplus or shortf
 
 | Source | What it supports |
 | --- | --- |
-| [AGMARKNET](https://agmarknet.gov.in/home) | Primary dataset. Public mandi arrivals in tonnes for five crops. The replay uses August 2025 and the previous three Augusts as its comparison period. Arrivals can change because of market reporting or changing trade patterns. |
+| [AGMARKNET](https://agmarknet.gov.in/home) | Primary dataset. Public mandi arrivals in tonnes and a separate wholesale-price series in ₹/quintal for seven crops. Exact-price data is market context, not a solver input. The replay uses August 2025 and the previous three Augusts as its comparison period. Arrivals can change because of market reporting or changing trade patterns. |
 | [MoFPI/NABCONS study](https://www.mofpi.gov.in/api/documents/file/phl_study_final_report_07.12.2022_2.pdf) and [Lok Sabha Q2998, state table](https://sansad.in/getFile/dms/fetch/2c9e315f-5d5e-4a39-8b63-cba3dfdfbdfe?source=dsp2) | Historical crop loss estimates for India and selected states. These figures span multiple harvest and post-harvest stages and are displayed as context. Missing or conflicting estimates are left blank. The study narrative and the Lok Sabha table disagree for Karnataka tomato. |
 | [FreshRetailNet-50K](https://huggingface.co/datasets/Dingdong-Inc/FreshRetailNet-50K) | Hourly store–product sales and stockout annotations from Dingdong. It fits the earlier retail stockout question. Its normalized sales and encoded locations cannot supply shipment quantities for Indian states. |
 | [Kaggle Favorita store sales](https://www.kaggle.com/competitions/store-sales-time-series-forecasting/data) | Grocery sales and promotions by store and product family in Ecuador. It fits sales forecasting. The fields do not measure spoilage or interstate shipment quantities. |
 | [Retail Transactions and Stocks](https://data.mendeley.com/datasets/27x8mjm8k4/1) | Store-level sales and stock on hand. Useful for retail allocation across stores. |
 | [DA&FW horticulture estimates, IASRI data book](https://www.iasri.res.in/uploads/IASRI%20Data%20Book%20-2025%20_low.pdf) and [DGCI&S e-way bill report](https://www.dgciskol.gov.in/writereaddata/Downloads/20260116130259Draft_Final_report_23_24.pdf) | Annual production and historic trade context. The 2023–24 road freight report omits volume analysis because reported units were inconsistent. |
 
-`data/arrivals.csv` includes the observed amounts and retains missing values. Run `python fetch_arrivals.py` to repeat the query for the same window and selected commodity IDs. Inspect the diff for historical revisions. A crop-state pair enters dispatch only if the 2025 value and all three comparison years are present. The dashboard shows missing data separately from a zero balance.
+`data/arrivals.csv` retains the arrival values for dispatch hubs. `data/market_context.csv` keeps volume and weighted wholesale prices for all available reporting states. Run `python fetch_arrivals.py` to repeat the query for the same window and selected commodity IDs. Inspect the diff for historical revisions. A crop-state pair enters dispatch only if the 2025 value and all three comparison years are present. The dashboard shows missing data separately from a zero balance.
 
 The simplified state geometries come from [geoBoundaries gbOpen India ADM1](https://www.geoboundaries.org/api/current/gbOpen/IND/ADM1/), sourced from DataMeet India community and the Election Commission of India under [CC BY 2.5 India](https://creativecommons.org/licenses/by/2.5/in/). This repo further simplifies the published geometries for display and retains the source names and codes.
 
