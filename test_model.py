@@ -3,7 +3,7 @@ import unittest
 
 from streamlit.testing.v1 import AppTest
 
-from model import Route, load_routes, scenario_balances, solve
+from model import Route, arrival_signals, load_routes, read_rows, scenario_balances, solve
 
 
 DEFAULT = dict(
@@ -60,9 +60,35 @@ class RoutingTests(unittest.TestCase):
         app = AppTest.from_file("app.py").run(timeout=20)
         self.assertEqual(len(app.exception), 0)
         self.assertEqual(app.metric[0].value, "17.80 t")
-        app.slider[1].set_value(12).run()
+        app.slider(key="shelf_Tomato").set_value(12).run()
         self.assertEqual(len(app.exception), 0)
         self.assertEqual(app.metric[0].value, "0.00 t")
+
+        app.segmented_control[0].set_value("Banana").run()
+        self.assertEqual(len(app.exception), 0)
+        self.assertEqual(app.slider(key="shelf_Banana").value, 36)
+        self.assertEqual(app.metric[0].value, "7.96 t")
+        app.radio[0].set_value("Survey loss").run()
+        self.assertEqual(len(app.exception), 0)
+        self.assertTrue(any("India estimate: 7.57%" in c.value for c in app.caption))
+
+    def test_missing_history_excludes_state_and_all_crops_can_dispatch(self):
+        banana = {row["state"]: row for row in arrival_signals("Banana")}
+        self.assertEqual(banana["Karnataka"]["reported"], 2684)
+        self.assertIsNone(banana["Karnataka"]["gap"])
+        for crop in read_rows("crops.csv"):
+            name = crop["crop"]
+            with self.subTest(crop=name):
+                surplus, deficit = scenario_balances(0.001, name)
+                if name == "Banana":
+                    self.assertNotIn("Karnataka", surplus)
+                    self.assertNotIn("Karnataka", deficit)
+                plan = solve(
+                    surplus, deficit, load_routes(),
+                    **{**DEFAULT, "shelf_hours": int(crop["shelf_hours"]),
+                       "transit_loss_per_hour": float(crop["transit_loss_percent_per_hour"]) / 100},
+                )
+                self.assertTrue(plan.transfers)
 
 
 if __name__ == "__main__":

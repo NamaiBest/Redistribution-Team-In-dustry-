@@ -1,8 +1,8 @@
-state,hub,longitude,latitude,historical_loss_percent
-Andhra Pradesh,Madanapalle,78.50,13.55,12.36
-Gujarat,Ahmedabad,72.57,23.02,10.97
-Karnataka,Kolar,78.13,13.14,
-Madhya Pradesh,Indore,75.86,22.72,11.85
-Maharashtra,Nashik,73.79,20.00,
-Odisha,Bhubaneswar,85.82,20.30,13.19
-Telangana,Hyderabad,78.49,17.39,
+state,code,hub,longitude,latitude
+Andhra Pradesh,IN-AP,Madanapalle,78.50,13.55
+Gujarat,IN-GJ,Ahmedabad,72.57,23.02
+Karnataka,IN-KA,Kolar,78.13,13.14
+Madhya Pradesh,IN-MP,Indore,75.86,22.72
+Maharashtra,IN-MH,Nashik,73.79,20.00
+Odisha,IN-OR,Bhubaneswar,85.82,20.30
+Telangana,IN-TG,Hyderabad,78.49,17.39

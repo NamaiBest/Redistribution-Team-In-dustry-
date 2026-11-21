@@ -46,29 +46,35 @@ def read_rows(filename):
         return list(csv.DictReader(file))
 
 
-def arrival_signals():
+def arrival_signals(crop="Tomato"):
     signals = []
     for row in read_rows("arrivals.csv"):
-        actual = float(row["aug_2025_t"])
-        typical = median(float(row[f"aug_{year}_t"]) for year in (2022, 2023, 2024))
-        signals.append({"state": row["state"], "reported": actual, "typical": typical,
-                        "gap": actual - typical})
+        if row["crop"] != crop:
+            continue
+        actual = float(row["aug_2025_t"]) if row["aug_2025_t"] else None
+        history = [float(row[f"aug_{year}_t"]) for year in (2022, 2023, 2024)
+                   if row[f"aug_{year}_t"]]
+        typical = median(history) if len(history) == 3 else None
+        gap = actual - typical if actual is not None and typical is not None else None
+        signals.append({"state": row["state"], "reported": actual, "typical": typical, "gap": gap})
     return signals
 
 
-def scenario_balances(scale):
-    gaps = {row["state"]: row["gap"] * scale for row in arrival_signals()}
+def scenario_balances(scale, crop="Tomato"):
+    gaps = {row["state"]: row["gap"] * scale for row in arrival_signals(crop)
+            if row["gap"] is not None}
     surplus = {state: gap for state, gap in gaps.items() if gap > 0}
     deficit = {state: -gap for state, gap in gaps.items() if gap < 0}
     return surplus, deficit
 
 
 def load_routes():
-    return [
-        Route(row["origin"], row["destination"], float(row["hours"]),
-              float(row["capacity_t"]), float(row["cost_per_t"]))
-        for row in read_rows("routes.csv")
-    ]
+    routes = []
+    for row in read_rows("routes.csv"):
+        a, b = row["origin"], row["destination"]
+        assumptions = float(row["hours"]), float(row["capacity_t"]), float(row["cost_per_t"])
+        routes.extend([Route(a, b, *assumptions), Route(b, a, *assumptions)])
+    return routes
 
 
 def solve(surplus, deficit, routes, *, shelf_hours, transit_loss_per_hour, local_loss_rate,

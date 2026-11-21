@@ -1,8 +1,36 @@
-state,aug_2025_t,aug_2024_t,aug_2023_t,aug_2022_t
-Andhra Pradesh,27900.41,34465.3,4139.3,87902.63
-Gujarat,28176.76,26108.33,13991.39,26126.65
-Karnataka,50933.4,122115.0,63375.0,156376.0
-Madhya Pradesh,6012.46,36.0,2856.43,4760.33
-Maharashtra,91083.1,72590.8,69110.98,93305.0
-Odisha,3635.74,4519.21,2582.2,5410.28
-Telangana,21468.97,22292.01,14639.48,58268.45
+crop,state,aug_2025_t,aug_2024_t,aug_2023_t,aug_2022_t
+Tomato,Andhra Pradesh,27900.41,34465.3,4139.3,87902.63
+Tomato,Gujarat,28176.76,26108.33,13991.39,26126.65
+Tomato,Karnataka,50933.4,122115.0,63375.0,156376.0
+Tomato,Madhya Pradesh,6012.46,36.0,2856.43,4760.33
+Tomato,Maharashtra,91083.1,72590.8,69110.98,93305.0
+Tomato,Odisha,3635.74,4519.21,2582.2,5410.28
+Tomato,Telangana,21468.97,22292.01,14639.48,58268.45
+Banana,Andhra Pradesh,9361.0,3760.0,10450.0,3422.39
+Banana,Gujarat,5970.54,5676.2,2374.73,3580.0
+Banana,Karnataka,2684.0,,3214.0,2703.0
+Banana,Madhya Pradesh,1240.4,17.74,58668.22,78656.68
+Banana,Maharashtra,9852.6,10.0,9123.0,4152.0
+Banana,Odisha,62.4,36.8,113.54,43.0
+Banana,Telangana,35.4,51.2,17.3,
+Brinjal,Andhra Pradesh,29.46,23.0,,
+Brinjal,Gujarat,5961.82,5067.97,5738.47,4297.16
+Brinjal,Karnataka,849.0,1009.0,1197.0,2085.0
+Brinjal,Madhya Pradesh,10549.19,19.0,2676.82,1872.45
+Brinjal,Maharashtra,9209.7,6816.9,7350.0,7579.0
+Brinjal,Odisha,5284.22,6822.17,6352.16,6889.86
+Brinjal,Telangana,2845.1,3504.82,4097.32,3828.98
+Cabbage,Andhra Pradesh,143.67,102.27,,
+Cabbage,Gujarat,15396.05,15120.69,10539.05,8614.14
+Cabbage,Karnataka,3071.0,2427.0,4490.0,6003.0
+Cabbage,Madhya Pradesh,12629.94,11.0,4081.78,2165.4
+Cabbage,Maharashtra,15939.4,15047.7,14321.0,14733.0
+Cabbage,Odisha,3291.54,4297.37,3876.86,3269.3
+Cabbage,Telangana,4461.73,5478.64,7458.41,7294.19
+Cauliflower,Andhra Pradesh,109.43,100.35,,
+Cauliflower,Gujarat,9597.3,9166.77,7244.46,4309.14
+Cauliflower,Karnataka,633.0,820.0,1560.0,1737.0
+Cauliflower,Madhya Pradesh,11889.54,0.4,2530.66,936.35
+Cauliflower,Maharashtra,130558.3,117396.9,35707.0,37011.0
+Cauliflower,Odisha,2190.28,3228.29,2758.78,2459.89
+Cauliflower,Telangana,1645.75,1821.25,3368.16,2785.8
