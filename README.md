@@ -6,7 +6,7 @@ The demo covers **tomato, banana, brinjal, cabbage, cauliflower, onion, and pota
 
 ## Team quick start
 
-[Open Produce Relay](https://namaibest.github.io/india-tomato-redistribution/). No installation or sign-in is needed. The site answers a dispatch question: which hub should send produce, which receiving hub can use it, and how much should move before it spoils?
+[Open Produce Relay](https://namaibest.github.io/Redistribution-Team-In-dustry-/). No installation or sign-in is needed. The site answers a dispatch question: which hub should send produce, which receiving hub can use it, and how much should move before it spoils?
 
 ### Try it in three minutes
 
