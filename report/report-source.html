@@ -1,0 +1,82 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+@page{size:A4;margin:16mm 17mm 18mm 17mm;@bottom-left{content:"Industry 4.0 & Business Analytics Project Report — FreshRetailNet-50K";font:8.5pt "Liberation Serif",serif;color:#555}@bottom-right{content:"Page " counter(page) " of " counter(pages);font:8.5pt "Liberation Serif",serif;color:#555}}
+body{-webkit-print-color-adjust:exact;print-color-adjust:exact;font:10.6pt/1.38 "Liberation Serif","Times New Roman",serif;color:#111;margin:0}
+h1{font-size:17pt;color:#1f3a5f;margin:0 0 3pt;line-height:1.2}
+.sub{font-size:9.5pt;padding-bottom:5pt;border-bottom:1.2pt solid #1f3a5f;margin-bottom:8pt}
+h2{font-size:11.5pt;color:#1f3a5f;text-transform:uppercase;letter-spacing:.3pt;border-bottom:.6pt solid #9fb0c6;padding-bottom:2pt;margin:11pt 0 5pt}
+p{margin:0 0 5pt;text-align:justify}
+ul,ol{margin:2pt 0 5pt 15pt;padding:0}li{margin-bottom:2.5pt;text-align:justify}
+code{font-family:"DejaVu Sans Mono",monospace;font-size:9pt}
+table{border-collapse:collapse;width:100%;font-size:9.3pt;margin:5pt 0 6pt}
+th{background:#1f3a5f;color:#fff;padding:3.5pt 5pt;text-align:left}td{padding:3pt 5pt;border-bottom:.5pt solid #ccd}
+td.n,th.n{text-align:right}tr.hl td{font-weight:bold}
+.cap{font-size:8.8pt;color:#333;margin-top:-2pt}
+.refs li{font-size:9.6pt}
+</style></head><body>
+<h1>Demand Censoring, Promotional Elasticity, and Same-Day Store Redistribution in Perishable Retail</h1>
+<div class="sub"><b>Course Project Summary Report</b> &nbsp;|&nbsp; Business Analytics &amp; Industry 4.0 &nbsp;|&nbsp; IIT Madras B.S. Degree Programme</div>
+
+<h2>1. Problem Statement</h2>
+<p>Perishable fresh-retail operations experience pronounced intraday shopping waves, promotional discount surges, and calendar or weather shifts, yet frequent daytime out-of-stock events censor observed daily sales below true customer demand. Relying on unadjusted point-of-sale records systematically underestimates demand for high-turnover items, misattributes promotional lift, and misallocates scarce stock. This study investigates the FreshRetailNet-50K dataset ([1]) to quantify latent demand censoring, estimate discount elasticity and environmental demand drivers, benchmark store-group efficiency, and design a same-day store-to-store redistribution model that recovers part of the censored demand.</p>
+
+<h2>2. Motivation for Problem Selection</h2>
+<p>Fresh produce and perishable consumer goods operate under tight shelf-life windows where over-ordering causes spoilage and under-ordering creates immediate lost sales. Both often happen in one city on the same day. Bridging empirical demand modeling from Business Analytics (regression, elasticity, chi-square testing, and Data Envelopment Analysis) with Industry 4.0 inventory and optimization frameworks (Apriori co-movement, stochastic inventory principles, and Linear Programming) enables redistribution decisions grounded in uncensored demand rather than distorted historical sales.</p>
+
+<h2>3. Research Questions</h2>
+<ul>
+<li><b>RQ1 (Intraday Dynamics &amp; Censoring):</b> How do hourly sales and stockout probabilities evolve across the 24-hour trading day, and how severely do daytime stockouts censor observed daily sales within baseline demand tiers?</li>
+<li><b>RQ2 (Promotions &amp; Price Elasticity):</b> How do price discounts and promotional campaign flags affect daily sales, and how do linear versus constant-elasticity demand curves and stockouts shape this response?</li>
+<li><b>RQ3 (External Drivers &amp; Operational Efficiency):</b> How do calendar events (holidays, weekends) and weather covariates shift demand, and how do management groups compare in relative operational efficiency?</li>
+<li><b>RQ4 (Co-Movement &amp; Allocation Policy):</b> Which product categories co-occur across store-days, and how much lost demand can a stockout-aware linear program recover by moving stock between stores?</li>
+</ul>
+
+<h2>4. Hypotheses, Objectives, and Constraints</h2>
+<p><b>Hypotheses:</b> (<i>H</i><sub>1</sub>) Demand exhibits bimodal intraday peaks while cumulative stockouts suppress daily sales once daytime stockout duration grows; (<i>H</i><sub>2</sub>) Demand is elastic (ε &lt; −1) under a constant-elasticity curve, with discount depth rather than campaign tags driving lift; (<i>H</i><sub>3</sub>) Weekends and holidays increase demand while operating groups vary significantly in efficiency; (<i>H</i><sub>4</sub>) Anchor categories exhibit strong store-day co-occurrence, and unsold stock at some stores can recover demand lost at others.</p>
+<p><b>Objectives:</b> Decompose 24-hour sales and stockout arrays to measure censoring gaps; estimate linear and log-log elasticity regressions with multicollinearity checks; evaluate calendar/weather effects via Multiple Linear Regression (MLR) and rank management groups via input-oriented CCR Data Envelopment Analysis (DEA); mine Apriori category rules; and plan same-day transfers between stores in a city with a Linear Program built on validated lost-demand estimates.</p>
+<p><b>Constraints &amp; Scope:</b> Daily and hourly sales in FreshRetailNet-50K are globally normalised volume metrics without unit currency prices, spoilage weights, or physical on-hand inventory levels; <code>discount</code> is a relative price multiplier (1.00 = full price); basket receipts are unobserved, requiring store-day category co-occurrence analysis; and store locations and leftover stock are not recorded, so leftover stock and transfer timing are treated as scenario inputs.</p>
+
+<h2>5. Exploratory Data Analysis (EDA)</h2>
+<p>Analysis was performed on a deterministic 20% hash sample comprising <b>901,800 store-product-day observations</b> across <b>19 columns</b> with zero missing values; the redistribution model uses all 4.5 million training rows (18 cities, 898 stores, 865 products, 28 Mar – 25 Jun 2024) and the 7-day evaluation week. Univariate profiling confirmed right-skewed daily sales (overall mean ~0.99, median ~0.60–0.70) and substantial daytime stockout exposure (mean ~3.18 hours out of 16 daytime hours from 06:00 to 22:00). Promotional campaigns (<code>activity_flag = 1</code>) account for 38.02% of observations (342,853 rows) versus 61.98% non-campaign days (558,947 rows). Discount tiers span full price (1.00; 48.09% of rows), light (0.86–0.99; 26.77%), moderate (0.71–0.85; 18.09%), and deep discounts (≤ 0.70; 7.05%). Structural cross-tabulations revealed that 97.79% of active campaign days carry price discounts (mean multiplier 0.8000 versus 0.9783 on non-campaign days), motivating explicit multicollinearity testing in RQ2.</p>
+
+<h2>6. Methodology</h2>
+<p>All analytical techniques strictly align with the Business Analytics and Industry 4.0 syllabus ([2], [3]):</p>
+<ol>
+<li><b>Intraday &amp; Censoring Decomposition (RQ1):</b> Stacked 24-element <code>hours_sale</code> and binary <code>hours_stock_status</code> arrays into 901,800 × 24 matrices to compare overall observed hourly sales against in-stock conditional sales. Series were stratified into four baseline demand quartiles (Q1–Q4) using zero-stockout median sales to evaluate daily sales decay across stockout duration buckets (0h, 1–3h, 4–8h, 9–15h, 16h).</li>
+<li><b>Demand Response &amp; Elasticity Modeling (RQ2):</b> Estimated Ordinary Least Squares (OLS) linear demand models (including <code>discount × activity_flag</code> and <code>discount × stock_hour6_22_cnt</code> interactions) alongside a constant-elasticity log-log specification, <code>ln(sale_amount) = β0 + ε ln(discount) + β2(activity_flag) + β3(stock_hour6_22_cnt)</code>, verified via Variance Inflation Factors (VIF).</li>
+<li><b>Calendar/Weather Regression &amp; DEA Benchmarking (RQ3):</b> Conducted a χ² test of independence (with Cramér's <i>V</i>) between <code>holiday_flag</code> and stockout incidence, fitted an extended MLR incorporating weekend, holiday, precipitation, temperature, humidity, and wind predictors, and solved an input-oriented CCR-DEA linear program across <code>management_group_id</code> units (output: mean sales; inputs: stockout burden and discount/precipitation exposure).</li>
+<li><b>Apriori Co-Movement (RQ4):</b> Mined frequent 1- and 2-itemsets across 79,342 active store-days (minimum support 0.05) for the top eight categories.</li>
+<li><b>Lost-Demand Estimation &amp; Redistribution LP (RQ4, final solution):</b> Learned an hourly demand profile (06:00–21:59) per store-product from in-stock hours only, and applied it to stockout hours, scaled by the day's stocked-hour sales. Validated chronologically by hiding hours on fully stocked days of the held-out week. For each city, product and day, a Linear Program (<code>scipy.optimize.linprog</code>) chooses units <i>x<sub>ij</sub></i> sent from store <i>i</i> to store <i>j</i> to maximise Σ(<i>p<sub>j</sub></i> − <i>c</i>)·<i>x<sub>ij</sub></i>, where <i>p<sub>j</sub></i> is the receiver's price multiplier and <i>c</i> the handling cost (0.15 of full price), subject to units sent ≤ the sender's unsold stock and units received ≤ the receiver's lost demand after the transfer arrives. Only stores with no stockout can send; the baseline is no transfers.</li>
+</ol>
+
+<h2>7. Results</h2>
+<p><b>RQ1 (Diurnal Curve &amp; Censoring):</b> Observed hourly sales peak in the morning at <b>09:00</b> (mean 0.1054) with a secondary afternoon wave at <b>15:00–16:00</b>, whereas hourly stockout rates climb monotonically to <b>41.94%</b> at <b>22:00</b> (daytime average 19.89%). Comparing in-stock conditional sales against observed sales exposes up to a <b>34.84% daytime hourly censoring gap</b>. Within high-demand tier Q4, mean daily sales fall from 2.9370 (1–3h brief stockouts) and 2.2032 (0h) down to 2.3142 (4–8h), 1.4821 (9–15h), and 0.0768 (16h full-day stockout).</p>
+<p><b>RQ2 (Promotional Elasticity):</b> Deep discounts (≤ 0.70) increase mean daily sales nearly 2.7× over full price (2.1758 vs. 0.8083). The constant-elasticity model outperforms the linear specification (<i>R</i>² = 0.0453 vs. 0.0402) and yields a statistically significant discount elasticity of <b>ε = −1.2555</b> (<i>p</i> &lt; 0.0001), indicating that a 1% reduction in the price multiplier is associated with a ~1.26% volume expansion. All predictors pass multicollinearity checks (VIF: <code>discount</code> = 2.440, <code>activity_flag</code> = 2.443, <code>stock_hour6_22_cnt</code> = 1.002). Once discount depth is controlled for, <code>activity_flag</code> shows a −8.16% residual shift, confirming that actual price cuts—not campaign tags—drive volume, while the positive <code>discount × stockout</code> interaction (+0.0616) shows stockouts dampen promotional lift.</p>
+<p><b>RQ3 (External Drivers &amp; Unit Efficiency):</b> While the χ² test between <code>holiday_flag</code> and stockout presence is statistically significant due to large sample size (χ² = 5.95, <i>p</i> = 0.0147), Cramér's <i>V</i> = 0.0026 indicates negligible practical dependence. Extending MLR with calendar and weather variables raises <i>R</i>² to <b>0.2493</b>: weekends (+0.1753, <i>t</i> = 34.58) and holidays (+0.1059, <i>t</i> = 21.93) significantly lift sales, whereas daytime stockouts (−0.0337/hr) and wind level (−0.0666) depress sales. CCR-DEA places management groups <b>2</b> and <b>6</b> on the efficiency frontier (θ = 1.0000), followed by group <b>3</b> (0.9039), group <b>0</b> (0.7629), group <b>5</b> (0.6545), group <b>4</b> (0.5957), and group <b>1</b> (0.5792).</p>
+<p><b>RQ4 (Category Co-Movement):</b> Apriori mining identifies <b>Category 8</b> as a core traffic anchor co-occurring with Categories <b>21</b> (lift = 1.2996, support = 0.2074), <b>10</b> (lift = 1.2934), <b>18</b> (lift = 1.2907), <b>20</b> (lift = 1.2213, confidence 8→20 = 78.10%), and <b>4</b> (lift = 1.1728, confidence 8→4 = 94.11%).</p>
+<p><b>RQ4 (Lost demand &amp; redistribution, final solution):</b> On the held-out week, the profile estimate was within <b>±3%</b> of true hidden sales; a flat 50% correction understated them by 23–78%. Over the 90 training days, stockouts hid an estimated <b>1.30 million units</b> of demand, about <b>29%</b> of observed sales. With unsold stock at fully stocked stores set to 10% of their sales and transfers on the shelf by 14:00, the LP recovers <b>148,122 units</b>, or <b>11.4%</b> of lost demand.</p>
+<table>
+<tr><th>Unsold stock at senders</th><th class="n">Arrival 10:00</th><th class="n">Arrival 14:00</th><th class="n">Arrival 18:00</th></tr>
+<tr><td>5% of their sales</td><td class="n">6.7%</td><td class="n">6.5%</td><td class="n">5.7%</td></tr>
+<tr class="hl"><td>10% of their sales (base case)</td><td class="n">12.0%</td><td class="n">11.4%</td><td class="n">9.1%</td></tr>
+<tr><td>20% of their sales</td><td class="n">20.1%</td><td class="n">18.5%</td><td class="n">13.0%</td></tr>
+<tr><td>30% of their sales</td><td class="n">26.0%</td><td class="n">23.6%</td><td class="n">15.2%</td></tr>
+</table>
+<p class="cap">Share of lost demand recovered. Stock, not speed, limits it. City 0 (290 stores): 13.8%; cities under 10 stores: 3.7–6.4%.</p>
+
+<h2>8. Managerial Implications</h2>
+<ul>
+<li><b>Pre-Peak Replenishment &amp; Censoring Correction:</b> Because sales peak at 09:00 and 15:00–16:00 while stockouts compound toward 22:00, replenishment cycles must occur prior to 08:30 and 14:30, and forecasting pipelines must replace raw historical sales with stockout-adjusted demand estimates.</li>
+<li><b>Stock-Backed Promotional Pricing:</b> With elastic demand (ε = −1.26), targeted price discounts drive substantial volume growth, but running discounts on stockout-prone SKUs erodes margin without fulfilling demand. Promotions should be gated on minimum safety-stock coverage and scaled up ahead of weekends (+0.175) and holidays (+0.106).</li>
+<li><b>Same-Day Redistribution, Starting in the Densest City:</b> Transfers recover 11–24% of lost demand depending on leftover stock. A pilot should log end-of-day unsold stock per store for two weeks in City 0, then run transfers on alternate days and compare fill rates. Groups 1, 4 and 5 (θ &lt; 0.66) should benchmark against frontier groups 2 and 6, and anchor Category 8 should keep a minimum shelf presence.</li>
+</ul>
+<p><b>Limitations:</b> The replay knows in hindsight which stores run out, so results are an upper bound; all stores in a city are treated as equally reachable.</p>
+
+<h2>9. References &amp; Data Source</h2>
+<ol class="refs">
+<li><b>Data Source:</b> Ding, Y., et al. (2025). <i>FreshRetailNet-50K: A Stockout-Annotated Censored Demand Dataset for Latent Demand Recovery and Forecasting in Fresh Retail.</i> Hugging Face Datasets (<code>Dingdong-Inc/FreshRetailNet-50K</code>).</li>
+<li>IIT Madras B.S. Degree Programme. <i>Business Analytics Course Lectures (L1–L63): Contingency Tables, Chi-Square Tests, Elasticity &amp; Demand Response Curves, Multiple Linear Regression, VIF, and Data Envelopment Analysis.</i></li>
+<li>IIT Madras B.S. Degree Programme. <i>Industry 4.0 Course Lectures (W1–W12): Apriori Association Rule Mining, Deterministic &amp; Stochastic Inventory (Newsvendor), Multi-Stage Allocation, Pricing, and Linear Programming Optimization.</i></li>
+</ol>
+</body></html>
