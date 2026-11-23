@@ -1,45 +1,51 @@
 import assert from "node:assert/strict"
 import test from "node:test"
 import { readFileSync } from "node:fs"
-import { historicalBalances, planTransfers } from "./planner.js"
+import { estimateNeed, planDay, scenario } from "./planner.js"
 
-const bundle = JSON.parse(readFileSync(new URL("./public/market.json", import.meta.url)))
-const defaults = { shelf: 24, transit: 0.25, localLoss: 50, lossPenalty: 5000, shortagePenalty: 8000 }
-const approx = (actual, expected) => assert.ok(Math.abs(actual - expected) < 1e-5,
+const bundle = JSON.parse(readFileSync(new URL("./public/results.json", import.meta.url)))
+const approx = (actual, expected) => assert.ok(Math.abs(actual - expected) < 1e-4,
   `${actual} should be close to ${expected}`)
 
-test("stock, received quantity and per-origin shelf life constrain a dispatch", () => {
-  const lanes = [{ a: "A", b: "B", hours: 10, capacity: 10, cost: 100 }]
-  const balances = { A: 8, B: -4 }
-  const plan = planTransfers(balances, lanes, { ...defaults, transit: 1 })
-  approx(plan.delivered, 4)
-  approx(plan.shipments[0].sent, 4 / .9)
-  approx(plan.remainingUnmet, 0)
-  assert.equal(planTransfers(balances, lanes, { ...defaults, originShelf: { A: 9 } }).shipments.length, 0)
-  assert.equal(planTransfers(balances, [{ ...lanes[0], cost: 50000 }], defaults).shipments.length, 0)
-})
-
-test("all seven browser scenarios agree with the reference Python optimizer", () => {
+test("each example day matches the Python linear program", () => {
+  // [unsold, need after 14:00, moved] from redistribution.plan_transfers at 10% unsold, cost 0.15.
   const expected = {
-    Tomato: [17.7964, 3.428123], Banana: [7.960703, 2.950337],
-    Brinjal: [2.86983, 4.349358], Cabbage: [4.83678, 5.893136],
-    Cauliflower: [2.63555, 52.156081], Onion: [16.949374, 25.764436],
-    Potato: [17.223286, 7.5895],
+    "14-4-2024-05-18": [3.65, 4.365954, 3.65],
+    "11-70-2024-04-21": [3.28, 4.304839, 3.28],
+    "0-546-2024-04-21": [2.928, 10.597605, 2.928],
+    "2-4-2024-05-19": [2.75, 10.196661, 2.75],
+    "1-580-2024-03-30": [2.33, 5.558535, 2.33],
+    "9-4-2024-05-25": [2.21, 3.997941, 2.21],
   }
-  assert.deepEqual(Object.keys(bundle.crops), Object.keys(expected))
-  for (const [crop, profile] of Object.entries(bundle.crops)) {
-    const balances = historicalBalances(bundle, crop, .001)
-    const plan = planTransfers(balances, bundle.lanes, {
-      ...defaults, shelf: profile.shelf, transit: profile.transit,
-    })
-    approx(plan.delivered, expected[crop][0])
-    approx(plan.waste, expected[crop][1])
-    approx(plan.baselineUnmet - plan.delivered, plan.remainingUnmet)
+  for (const example of bundle.examples) {
+    const plan = planDay(example, bundle.profiles, { share: 0.1, hour: 14, cost: 0.15 })
+    const [unsold, need, moved] = expected[`${example.city_id}-${example.product_id}-${example.dt}`]
+    approx(plan.unsold, unsold)
+    approx(plan.need, need)
+    approx(plan.moved, moved)
   }
 })
 
-test("a missing historical value stays out of dispatch while observed data remains visible", () => {
-  assert.equal(bundle.market.Banana["IN-KA"].arrival[0], 2684)
-  assert.equal(historicalBalances(bundle, "Banana", .001).Karnataka, null)
-  assert.equal(bundle.market.Tomato["IN-KA"].price[0], 1952.23)
+test("a transfer never exceeds a sender's unsold stock or a receiver's need", () => {
+  for (const example of bundle.examples) {
+    const plan = planDay(example, bundle.profiles, { share: 0.3, hour: 10, cost: 0 })
+    for (const store of plan.stores) {
+      const sent = plan.lanes.filter(l => l.from === store.store_id).reduce((a, l) => a + l.units, 0)
+      const got = plan.lanes.filter(l => l.to === store.store_id).reduce((a, l) => a + l.units, 0)
+      assert.ok(sent <= store.unsold + 1e-6)
+      assert.ok(got <= store.need + 1e-6)
+    }
+  }
+})
+
+test("stockout hours before arrival are not counted as recoverable", () => {
+  const store = { sales: Array(16).fill(1), out: Array(16).fill(0).map((_, i) => (i >= 8 ? 1 : 0)) }
+  const profile = Array(16).fill(1)
+  approx(estimateNeed(store, profile, 6), 8)
+  approx(estimateNeed(store, profile, 18), 4)
+})
+
+test("the headline scenario is in the bundle", () => {
+  const row = scenario(bundle.sensitivity, "all", 0.1, 14)
+  approx(row.recovered / row.lost, 0.1139)
 })

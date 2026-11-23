@@ -1,78 +1,82 @@
-# Interstate redistribution of perishable produce
+# Store Relay: same-day transfers between stores on FreshRetailNet-50K
 
-**Research question.** Under what shelf-life, lane-capacity, and transport-cost conditions can interstate transfers of perishable produce reduce modeled spoilage and unfilled receiving targets compared with keeping stock local?
+**Research question.** When a store runs out of a fresh product and another store in the same city ends the day with that product unsold, how much of the lost demand could a same-day transfer recover?
 
-The demo covers **tomato, banana, brinjal, cabbage, cauliflower, onion, and potato** across seven representative state hubs. It applies inventory optimization and logistics from the [IIT Madras Industry 4.0 course outline](https://study.iitm.ac.in/ds/course_pages/BSMS4001.html).
+Everything in this repository uses one dataset: [FreshRetailNet-50K](https://huggingface.co/datasets/Dingdong-Inc/FreshRetailNet-50K) (Dingdong fresh retail; 18 cities, 898 stores, 865 products, hourly sales and hourly stockout flags; 90 training days, 28 Mar – 25 Jun 2024, and a 7-day evaluation week, 26 Jun – 2 Jul 2024).
 
-## Team quick start
+- `artifacts/`: the team notebook with EDA and research questions RQ1–RQ4.
+- `redistribution.py`, `run_analysis.py`, `app.py`, `web/`: the redistribution model built on RQ1's finding that stockouts hide demand.
 
-[Open Produce Relay](https://namaibest.github.io/Redistribution-Team-In-dustry-/). No installation or sign-in is needed. The site answers a dispatch question: which hub should send produce, which receiving hub can use it, and how much should move before it spoils?
+[Open Store Relay](https://namaibest.github.io/Redistribution-Team-In-dustry-/). No installation needed.
 
-### Try it in three minutes
+## Results
 
-1. Under **Perishable crop**, choose **Tomato**. Keep **Historical replay** and select **Dispatch balance** under **Map shading**. Green indicates modeled surplus and orange indicates a modeled shortfall. Click a state to inspect its arrivals, wholesale price, and dispatch balance.
-2. Scroll to **Proposed shipments**. The default replay delivers **17.80 t** across four lanes. Modeled spoilage falls from **11.86 t to 3.43 t** compared with zero transfers under the same settings. Set shelf life to **12 hours** and the tomato shipments drop to zero. Restore **24 hours** before the next step.
-3. Switch **Planning data** to **Enter hub stock & orders**. Enter **10 t saleable stock in Maharashtra** and **5 t confirmed orders in Karnataka**. With the default lane settings, the planner sends about **5.25 t** to deliver **5.00 t** after transit loss. Use **Download CSV** to see the proposed shipment in a shareable format.
-4. Return to **Historical replay** and try **Banana** or **Onion**. Choose **Wholesale price** to inspect a different market signal. For banana, Madhya Pradesh becomes a receiver. Each run uses one crop.
-
-### What to explain in the viva
-
-- **Why this problem matters.** India used interstate tomato procurement in 2023 to supply markets facing rising retail prices. Our tool tests how a coordinator could evaluate transfers when stock and orders are known. [Government announcement](https://www.pib.gov.in/PressReleasePage.aspx?PRID=1938858&lang=2&reg=48)
-- **What the data actually measures.** AGMARKNET records arrivals at reporting mandis and weighted wholesale prices. The replay uses the arrival gap as a proxy for available stock or an unfilled receiving target. The national map can show observations beyond the seven hubs in the dispatch model. Survey loss is a separate historical measure.
-- **Why use a linear program.** The decision variable is tonnes to send on each lane. Cost and modeled losses scale with tonnes. Supply, buyer orders, travel time, and lane capacity constrain the plan. This makes it possible to explain each proposed transfer and compare it with zero transfers.
-- **What our results establish.** The numbers are outputs of a simulation, using assumed costs and spoilage rates. A field pilot would use time-stamped stock, buyer orders, route quotes, and measured edible weights at dispatch and receipt. Single-crop runs do not share vehicle capacity.
-- **What to prepare.** The course calls for a two-page Week 8 summary, a three-page final group report, a 15-minute viva presentation with 5 minutes of Q&A, and a team contribution record. Use the [operational-application passage](report/operational-application.md) in the managerial implications section.
-
-## Run the browser planner locally
-
-Use Node.js 24 and Python 3. The browser runs the optimization locally. Entered quantities stay in the open session.
-
-```sh
-cd web
-npm ci
-npm test
-npm run dev
-```
-
-The site uses [Leaflet](https://github.com/Leaflet/Leaflet) for the map, [Scrollama](https://github.com/russellsamora/scrollama) for the scroll-driven walkthrough, and [javascript-lp-solver](https://github.com/JWally/jsLPSolver) for the linear program. The visual pacing follows the [ScrollCraft](https://github.com/singhharsh1708/scrollcraft) approach. The produce photo is illustrative.
-
-## Run the Python demo
-
-From the repository root with Python 3.12:
-
-```sh
-python -m venv .venv
-source .venv/bin/activate
-python -m pip install -r requirements.txt
-python -m streamlit run app.py
-```
-
-Select a crop. The dispatch map supports three views: starting surplus or shortfall, modeled local spoilage after transfers, and published survey loss percentages. Hover on states for values or on paths for shipment details. Paths connect representative hubs and are schematic. **Compare crops** runs each crop independently using its own shelf-life and transit-spoilage presets. A combined multi-crop dispatch would need shared vehicle capacity and compatibility constraints.
-
-## Dataset review
-
-| Source | What it supports |
+| | Value |
 | --- | --- |
-| [AGMARKNET](https://agmarknet.gov.in/home) | Primary dataset. Public mandi arrivals in tonnes and a separate wholesale-price series in ₹/quintal for seven crops. Exact-price data is market context, not a solver input. The replay uses August 2025 and the previous three Augusts as its comparison period. Arrivals can change because of market reporting or changing trade patterns. |
-| [MoFPI/NABCONS study](https://www.mofpi.gov.in/api/documents/file/phl_study_final_report_07.12.2022_2.pdf) and [Lok Sabha Q2998, state table](https://sansad.in/getFile/dms/fetch/2c9e315f-5d5e-4a39-8b63-cba3dfdfbdfe?source=dsp2) | Historical crop loss estimates for India and selected states. These figures span multiple harvest and post-harvest stages and are displayed as context. Missing or conflicting estimates are left blank. The study narrative and the Lok Sabha table disagree for Karnataka tomato. |
-| [FreshRetailNet-50K](https://huggingface.co/datasets/Dingdong-Inc/FreshRetailNet-50K) | Hourly store–product sales and stockout annotations from Dingdong. It fits the earlier retail stockout question. Its normalized sales and encoded locations cannot supply shipment quantities for Indian states. |
-| [Kaggle Favorita store sales](https://www.kaggle.com/competitions/store-sales-time-series-forecasting/data) | Grocery sales and promotions by store and product family in Ecuador. It fits sales forecasting. The fields do not measure spoilage or interstate shipment quantities. |
-| [Retail Transactions and Stocks](https://data.mendeley.com/datasets/27x8mjm8k4/1) | Store-level sales and stock on hand. Useful for retail allocation across stores. |
-| [DA&FW horticulture estimates, IASRI data book](https://www.iasri.res.in/uploads/IASRI%20Data%20Book%20-2025%20_low.pdf) and [DGCI&S e-way bill report](https://www.dgciskol.gov.in/writereaddata/Downloads/20260116130259Draft_Final_report_23_24.pdf) | Annual production and historic trade context. The 2023–24 road freight report omits volume analysis because reported units were inconsistent. |
+| Lost demand in stockout hours, 90 days, all cities | 1,300,872 units |
+| Still sellable after a transfer lands at 14:00 | 912,106 units |
+| Unsold stock at stores that never ran out (10% scenario) | 231,805 units |
+| **Recovered by transfers** | **148,122 units, 11.4% of lost demand** |
 
-`data/arrivals.csv` retains the arrival values for dispatch hubs. `data/market_context.csv` keeps volume and weighted wholesale prices for all available reporting states. Run `python fetch_arrivals.py` to repeat the query for the same window and selected commodity IDs. Inspect the diff for historical revisions. A crop-state pair enters dispatch only if the 2025 value and all three comparison years are present. The dashboard shows missing data separately from a zero balance.
+Units are FreshRetailNet's normalised sales. Total observed sales over the same days are 4,493,661 units, so stockouts hide demand equal to about 29% of what was sold.
 
-The simplified state geometries come from [geoBoundaries gbOpen India ADM1](https://www.geoboundaries.org/api/current/gbOpen/IND/ADM1/), sourced from DataMeet India community and the Election Commission of India under [CC BY 2.5 India](https://creativecommons.org/licenses/by/2.5/in/). This repo further simplifies the published geometries for display and retains the source names and codes.
+1. **Stock left over elsewhere is the binding constraint.** At every setting, unsold stock is smaller than the demand still sellable. Recovery rises from 6.5% to 23.6% as unsold stock goes from 5% to 30% of sales (14:00 arrival).
+2. **Speed matters less than stock.** At 10% unsold stock, moving arrival from 18:00 to 10:00 lifts recovery from 9.1% to 12.0%.
+3. **Dense cities gain most.** City 0 (290 stores) recovers 13.8%. Cities with fewer than 10 stores recover 3.7–6.4%, because there is often no fully stocked store for the same product that day.
 
-## How the optimizer works
+### The lost-demand estimate, tested
 
-1. Subtract each state's median arrivals for August 2022–24 from August 2025 arrivals for the chosen crop. In the default scenario, use **0.1% of the gap** as a pilot-scale excess or receiving target. These arrivals are proxies. A real dispatch needs confirmed usable stock at the source and buyer orders at the destination.
-2. Allow a transfer only between a surplus and a receiver with an unfilled target. Each lane uses assumed travel time, capacity, and cost. The reverse direction uses the same assumptions. Crop shelf-life and hourly spoilage presets are adjustable scenario inputs. The model assumes delivered produce is used immediately.
-3. Choose tonnes sent using a linear program. It minimizes transport spend plus assumed penalties for spoilage and unfilled targets. Gross dispatch is capped by source stock and lane capacity. Edible receipts after transit spoilage are capped by the receiving target.
-4. Compare with zero transfers under the same assumptions. Modeled spoilage is the sum of transit loss and the assumed loss on unsent surplus. The historic survey percentages are never applied as route loss rates.
+The report's RQ4 used `D = S / (1 − 0.5·f)`. We tested it against an hourly-profile estimate on days we can check: fully stocked days in the held-out week, with later hours hidden on purpose.
 
-## Validate locally
+| Hidden from | 50% rule | Flat in-stock rate | Hourly profile (ours) |
+| --- | --- | --- | --- |
+| 10:00 | −77.9% | +10.7% | +2.6% |
+| 14:00 | −60.5% | +18.5% | +0.3% |
+| 18:00 | −22.7% | +80.3% | −2.6% |
+
+Values are the bias in total hidden sales. The profile is learned only from the training period, so the test is chronological. Per-day errors are still large (mean absolute error 54–70% of a day's hidden sales), because single store-product-days are noisy. The estimate is reliable in aggregate and should not be used to plan one shelf.
+
+## How the model works
+
+1. **Hourly demand profile.** For each store-product, average sales in every daytime hour (06:00–21:59), using only hours when the product was in stock.
+2. **Lost demand.** On a stockout day, apply the profile to the empty hours, scaled by that day's sales in its stocked hours (scale clipped to 0.25–4×).
+3. **Transfer plan.** For each city, product and day, a linear program:
+   - decision: `x[i,j]`, units sent from store *i* to store *j* in the same city
+   - maximise `Σ (price_j − handling cost) · x[i,j]`, where `price_j` is the receiver's `discount` multiplier
+   - subject to: sent ≤ unsold stock at *i*, received ≤ demand at *j* in stockout hours after the transfer arrives
+   - only stores that never ran out that day can send
+
+   With equal costs on every lane, the LP fills the highest-price receivers first. The replay uses that closed form for speed, and `test_redistribution.py` checks it against `scipy.optimize.linprog` on 200 random cases.
+4. **Baseline.** No transfers: fulfilled demand equals observed sales.
+
+### Assumptions, stated
+
+- **Unsold stock** at fully stocked stores (default 10% of their daytime sales). The dataset has no stock on hand.
+- **Arrival hour** of a transfer (default 14:00).
+- **Handling cost** per unit (default 15% of full price).
+- Any two stores in a city are reachable at the same cost. The dataset has no locations.
+- The replay knows in hindsight which stores run out, so results are an upper bound for each scenario.
+
+## What to say in the viva
+
+- **Why it matters.** RQ1 shows stockouts climb to 42% of products by 22:00. Lost sales and waste happen in the same city on the same day.
+- **What the model adds.** It turns RQ1's censoring finding into a decision: which store sends how much to which store.
+- **What it can't claim.** Unsold stock and travel are assumptions. A pilot would log end-of-day leftovers at each store for two weeks in one dense city (City 0), then run transfers on alternate days and compare fill rates.
+
+## Run it
 
 ```sh
-python -m unittest -v
+python -m venv .venv && source .venv/bin/activate
+python -m pip install -r requirements.txt
+python -m unittest -v            # model tests
+python run_analysis.py           # rebuilds data/ (downloads ~115 MB, needs ~4 GB RAM)
+python -m streamlit run app.py   # local dashboard
 ```
+
+Website:
+
+```sh
+cd web && npm ci && npm test && npm run dev
+```
+
+The site uses [javascript-lp-solver](https://github.com/JWally/jsLPSolver) to solve each day's plan in the browser. The produce photo is illustrative.
