@@ -4,7 +4,8 @@
 
 Everything in this repository uses one dataset: [FreshRetailNet-50K](https://huggingface.co/datasets/Dingdong-Inc/FreshRetailNet-50K) (Dingdong fresh retail; 18 cities, 898 stores, 865 products, hourly sales and hourly stockout flags; 90 training days, 28 Mar – 25 Jun 2024, and a 7-day evaluation week, 26 Jun – 2 Jul 2024).
 
-- `artifacts/`: the team notebook with EDA and research questions RQ1–RQ4.
+- `artifacts/In_dustry_Industry4_0_Master_Notebook.ipynb`: the final team notebook (EDA and RQ1–RQ4, revised after review).
+- `report/Industry 4.0 Project Report.pdf`: the submitted 3-page report.
 - `redistribution.py`, `run_analysis.py`, `app.py`, `web/`: the redistribution model built on RQ1's finding that stockouts hide demand.
 
 [Open Store Relay](https://namaibest.github.io/Redistribution-Team-In-dustry-/). No installation needed.
