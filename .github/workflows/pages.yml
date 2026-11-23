@@ -1,4 +1,4 @@
-name: Publish Produce Relay
+name: Publish Store Relay
 
 on:
   push:
@@ -11,7 +11,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: produce-relay-pages
+  group: store-relay-pages
   cancel-in-progress: false
 
 jobs:

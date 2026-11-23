@@ -1,8 +1,0 @@
-crop,agmarknet_id,shelf_hours,transit_loss_percent_per_hour,national_loss_percent
-Tomato,65,24,0.25,11.61
-Banana,19,36,0.15,7.57
-Brinjal,32,24,0.25,7.41
-Cabbage,126,36,0.10,8.15
-Cauliflower,31,30,0.20,7.89
-Onion,23,72,0.05,7.26
-Potato,24,72,0.05,5.96
